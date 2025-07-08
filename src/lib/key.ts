@@ -28,17 +28,17 @@ export async function getKey(key: string, keyValueStore: KVNamespace) {
   return link;
 }
 
-export async function existingLinkCheck(
+export async function getExistingKeyForLink(
   link: string,
   reverseLinkKeyValueStore: KVNamespace
 ): Promise<string | false> {
-  const existingShortKey = await reverseLinkKeyValueStore.get(link);
+  const getExistingKeyForLink = await reverseLinkKeyValueStore.get(link);
 
-  if (existingLinkCheck === null) {
+  if (getExistingKeyForLink === null) {
     return false;
   }
 
-  return existingShortKey || false;
+  return getExistingKeyForLink || false;
   //   const keys = (await reverseLinkKeyValueStore.list()).keys;
 
   //   for (const key of keys) {

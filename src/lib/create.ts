@@ -1,22 +1,22 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { sendNotification } from "./notification";
-import { existingLinkCheck, generateKey } from "./key";
+import { getExistingKeyForLink, generateKey } from "./key";
 import { checkRateLimit, setRateLimit } from "./rateLimits";
 
-interface CloudflareEnv {
-  LINKS: KVNamespace;
-  RESERVE_LINKS: KVNamespace;
-  LIMITS: KVNamespace;
-  DISCORD_WEBHOOK?: string;
-}
+// interface CloudflareEnv {
+//   LINKS: KVNamespace;
+//   RESERVE_LINKS: KVNamespace;
+//   LIMITS: KVNamespace;
+//   DISCORD_WEBHOOK?: string;
+// }
 
-interface CloudflareCOntent {
-  env: CloudflareEnv;
-  cf: {
-    country: string;
-    city: string;
-  };
-}
+// interface CloudflareCOntent {
+//   env: CloudflareEnv;
+//   cf: {
+//     country: string;
+//     city: string;
+//   };
+// }
 
 export async function create(
   link: string,
@@ -26,12 +26,14 @@ export async function create(
 ) {
   const timeA = Date.now();
 
-  const cloudflareContext =
-    (await getCloudflareContext()) as unknown as CloudflareCOntent;
+  const { env, cf } = getCloudflareContext();
 
-  const linkKeyValueStore = cloudflareContext.env.LINKS;
-  const reserveLinkKeyValueStore = cloudflareContext.env.RESERVE_LINKS;
-  const limitKeyValueStore = cloudflareContext.env.LIMITS;
+  //   const cloudflareContext =
+  //     (await getCloudflareContext()) as unknown as CloudflareCOntent;
+
+  const linkKeyValueStore = env.LINKS;
+  const reserveLinkKeyValueStore = env.RESERVE_LINKS;
+  const limitKeyValueStore = env.LIMITS;
 
   if (!linkKeyValueStore) {
     throw new Error("Missing KV Namespace: LINKS do not exist");
@@ -49,10 +51,11 @@ export async function create(
     };
   }
 
-  const existingLink = await existingLinkCheck(link, reserveLinkKeyValueStore);
+  const existingLink = await getExistingKeyForLink(link, reserveLinkKeyValueStore);
+
   if (existingLink) {
     await sendNotification(
-      cloudflareContext.env.DISCORD_WEBHOOK,
+      env.DISCORD_WEBHOOK,
       "Link Created",
       "An existing link has been requested",
       [
@@ -63,7 +66,7 @@ export async function create(
         },
         {
           name: "🔎 Context",
-          value: `🌍 \`${cloudflareContext.cf.country}\` / \`${cloudflareContext.cf.city}\`\n🔦 \`${rayId}\``,
+          value: `🌍 \`${cf?.country}\` / \`${cf?.city}\`\n🔦 \`${rayId}\``,
           inline: true,
         },
       ],
@@ -90,7 +93,7 @@ export async function create(
   }
 
   await sendNotification(
-    cloudflareContext.env.DISCORD_WEBHOOK,
+    env.DISCORD_WEBHOOK,
     "Link Created",
     "A new link has been created",
     [
@@ -101,7 +104,7 @@ export async function create(
       },
       {
         name: "🔎 Context",
-        value: `🌍 \`${cloudflareContext.cf.country}\` / \`${cloudflareContext.cf.city}\`\n🔦 \`${rayId}\``,
+        value: `🌍 \`${cf?.country}\` / \`${cf?.city}\`\n🔦 \`${rayId}\``,
         inline: true,
       },
     ],

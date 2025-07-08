@@ -1,21 +1,24 @@
 import { getKey } from "@/lib/key";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-interface CloudflareContext {
-  env: {
-    LINKS: KVNamespace;
-  };
-}
+// interface CloudflareContext {
+//   env: {
+//     LINKS: KVNamespace;
+//   };
+// }
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ link: string }> }
 ) {
   const availableParams = await params;
-  const cloudflareContext =
-    (await getCloudflareContext()) as unknown as CloudflareContext;
 
-  const linkKeyValueStore: KVNamespace = cloudflareContext.env.LINKS;
+  //   const cloudflareContext =
+  //     (await getCloudflareContext()) as unknown as CloudflareContext;
+
+  const { env } = getCloudflareContext();
+
+  const linkKeyValueStore: KVNamespace = env.LINKS;
 
   if (!linkKeyValueStore) {
     throw new Error("Missing KV Namespace: LINKS do not exist");
