@@ -1,0 +1,19 @@
+name = "url-shortener"
+main = ".open-next/server-function/index.js"
+compatibility_date = "2025-06-15"
+
+[site]
+bucket = ".open-next/assets"
+
+[[kv_namespaces]]
+binding = "LINKS"
+id = "516c8e69e29143329dc5fb10985c9ef7"
+
+[[kv_namespaces]]
+binding = "RESERVE_LINKS"
+id = "714fba346cb841e388352fed6c6f7dfb"
+
+[[kv_namespaces]]
+binding = "LIMITS"
+id = "6377fefac7734fe2be712f823b4a48ce"
+
